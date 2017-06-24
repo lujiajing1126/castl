@@ -25,11 +25,29 @@ local errorHelper = require("castl.modules.error_helper")
 local throw = require("castl.jssupport").throw
 
 local type, pairs, ipairs, tostring = type, pairs, ipairs, tostring
-local getmetatable, rawset, rawget = getmetatable, rawset, rawget
+local getmetatable, setmetatable, rawset, rawget = getmetatable, setmetatable, rawset, rawget
 local null, setNewMetatable, ToObject, ToString = internal.null, internal.setNewMetatable, internal.ToObject, internal.ToString
 local getFunctionProxy = internal.getFunctionProxy
 
 _ENV = nil
+
+local metaMethodAvailable = {
+    ["__tostring"] = 0,
+    ["__index"] = 1,
+    ["__newindex"] = 2,
+    ["__gc"] = 3,
+    ["__call"] = 4,
+    ["__add"] = 5,
+    ["__sub"] = 6,
+    ["__mul"] = 7,
+    ["__div"] = 8,
+    ["__mod"] = 9,
+    ["__unm"] = 10,
+    ["__concat"] = 11,
+    ["__eq"] = 12,
+    ["__lt"] = 13,
+    ["__le"] = 14,
+}
 
 Object = function (this, obj)
     if obj == nil or obj == null then
@@ -90,6 +108,12 @@ Object.defineProperty = function(this, obj, prop, descriptor)
 
     -- value
     if descriptor.value ~= nil then
+        if type(descriptor.value) == 'function' and metaMethodAvailable[prop] ~= nil then
+            setmetatable(obj, {
+                [prop] = descriptor.value
+            })
+            return obj
+        end
         -- TODO: related to weak typing
         if type(prop) ~= "number" then
             prop = ToString(prop)
