@@ -31,22 +31,22 @@ local getFunctionProxy = internal.getFunctionProxy
 
 _ENV = nil
 
-local metaMethodAvailable = {
-    ["__tostring"] = 0,
-    ["__index"] = 1,
-    ["__newindex"] = 2,
-    ["__gc"] = 3,
-    ["__call"] = 4,
-    ["__add"] = 5,
-    ["__sub"] = 6,
-    ["__mul"] = 7,
-    ["__div"] = 8,
-    ["__mod"] = 9,
-    ["__unm"] = 10,
-    ["__concat"] = 11,
-    ["__eq"] = 12,
-    ["__lt"] = 13,
-    ["__le"] = 14,
+local metaMethodsMap = {
+    ["toString"] = "__tostring",
+    ["__index"] = "__index",
+    ["__newindex"] = "__newindex",
+    ["__gc"] = "__gc",
+    ["__call"] = "__call",
+    ["__add"] = "__add",
+    ["__sub"] = "__sub",
+    ["__mul"] = "__mul",
+    ["__div"] = "__div",
+    ["__mod"] = "__mod",
+    ["__unm"] = "__unm",
+    ["__concat"] = "__concat",
+    ["__eq"] = "__eq",
+    ["__lt"] = "__lt",
+    ["__le"] = "__le",
 }
 
 Object = function (this, obj)
@@ -108,9 +108,9 @@ Object.defineProperty = function(this, obj, prop, descriptor)
 
     -- value
     if descriptor.value ~= nil then
-        if type(descriptor.value) == 'function' and metaMethodAvailable[prop] ~= nil then
+        if type(descriptor.value) == 'function' and metaMethodsMap[prop] ~= nil then
             setmetatable(obj, {
-                [prop] = descriptor.value
+                [metaMethodsMap[prop]] = descriptor.value
             })
             return obj
         end
